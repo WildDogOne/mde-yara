@@ -1,4 +1,4 @@
-rule silent_banker : TestScan
+rule TestScan : TestScan
 {
     meta:
         description = "This is just an example"
