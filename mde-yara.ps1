@@ -6,9 +6,16 @@ param (
 # Define paths
 $yaraPath = "C:\temp\yara"
 $yaraZipPath = "$yaraPath\yara.zip"
-$rulesRepoUrl = "https://github.com/WildDogOne/mde-yara.git"
+$rulesRepoUrl = "https://raw.githubusercontent.com/WildDogOne/mde-yara/main/"
 $rulesPath = "$yaraPath\rules"
 $yaraResults = "$yaraPath\yara_results.txt"
+#$rules = @("test.yar")
+$rulesFile = "rules.txt"
+Invoke-WebRequest -Uri $rulesRepoUrl+"rules.txt" -OutFile $rulesFile
+# Read the rule files from the text file
+$rules = Get-Content -Path $rulesFile
+# Convert $rules to an array
+$rules = $rules -split "`n"
 
 # Remove the YARA directory if it exists
 if (Test-Path -Path $yaraPath) {
@@ -39,11 +46,20 @@ Invoke-WebRequest -Uri $yaraUrl -OutFile $yaraZipPath
 # Extract the YARA executable ZIP file
 Expand-Archive -Path $yaraZipPath -DestinationPath $yaraPath
 
-# Download the YARA rules repository
+# Make sure rulesPath exists
+
 if (-Not (Test-Path -Path $rulesPath)) {
     New-Item -ItemType Directory -Path $rulesPath
 }
-git clone $rulesRepoUrl $rulesPath
+
+for ($i = 0; $i -lt $rules.Length; $i++) {
+    $rule = $rules[$i]
+    $ruleUrl = $rulesRepoUrl + $rule
+    $rulePath = "$rulesPath\$rule"
+
+    # Download the YARA rule
+    Invoke-WebRequest -Uri $ruleUrl -OutFile $rulePath
+}
 
 # Get all YARA Rules in path
 $yaraRules = Get-ChildItem -Path $rulesPath -Recurse -Include *.yar
