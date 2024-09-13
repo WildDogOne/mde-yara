@@ -51,5 +51,9 @@ $yaraRules = Get-ChildItem -Path $rulesPath -Recurse -Include *.yar
 # Convert $yaraRules to space-separated string
 $yaraRules = $yaraRules -join " "
 
+"YARA scan started" | Out-File -FilePath $yaraResults
+
 # Execute YARA with the downloaded rules
-& $yaraExePath -s -r $yaraRules "$searchPath" | Out-File -FilePath $yaraResults
+& $yaraExePath -s -r $yaraRules "$searchPath" | Out-File -FilePath $yaraResults -Append
+
+"YARA scan complete" | Out-File -FilePath $yaraResults -Append
